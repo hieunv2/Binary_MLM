@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 contract BinaryMLM {
     struct User {
         address parent;
@@ -10,8 +12,22 @@ contract BinaryMLM {
     
     address public root;
     mapping(address => User) public users;
+    mapping(address => bool) public allowedAddresses;
 
-    function addUser(address userAddress, address refAddress) public {
+    modifier onlyAllowed() {
+        require(allowedAddresses[msg.sender], "Caller is not allowed");
+        _;
+    }
+
+    function allowAddress(address _address) public onlyOwner {
+        allowedAddresses[_address] = true;
+    }
+
+    function disallowAddress(address _address) public onlyOwner {
+        allowedAddresses[_address] = false;
+    }
+
+    function addUser(address userAddress, address refAddress) public onlyAllowed {
         require(users[userAddress].parent == address(0), "User already added");
         
         if(root == address(0)) {

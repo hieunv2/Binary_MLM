@@ -25,6 +25,8 @@ describe("BinaryMLM", function () {
 
     const accounts = await ethers.getSigners();
 
+    await binaryMLM.allowAddress(accounts[0].address);
+
     for (let i = 1; i < 15; i++) {
       console.log(i, accounts[i].address);
     }

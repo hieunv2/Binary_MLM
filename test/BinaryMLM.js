@@ -1,11 +1,27 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const archy = require("archy");
 
 describe("BinaryMLM", function () {
   it("Should create users and correctly form the binary tree", async function () {
     const BinaryMLM = await ethers.getContractFactory("BinaryMLM");
     const binaryMLM = await BinaryMLM.deploy();
     await binaryMLM.deployed();
+
+    async function constructTree(address) {
+      let user = await binaryMLM.users(address);
+
+      let node = { label: address, nodes: [] };
+
+      if (user.left != ethers.constants.AddressZero) {
+        node.nodes.push(await constructTree(user.left));
+      }
+      if (user.right != ethers.constants.AddressZero) {
+        node.nodes.push(await constructTree(user.right));
+      }
+
+      return node;
+    }
 
     const accounts = await ethers.getSigners();
 
@@ -103,5 +119,11 @@ describe("BinaryMLM", function () {
     console.log(parentsOfFourthUser);
     expect(parentsOfFourthUser[0]).to.equal(accounts[3].address);
     expect(parentsOfFourthUser[1]).to.equal(accounts[1].address);
+
+    // Construct the tree object
+    let tree = await constructTree(accounts[1].address);
+
+    // Print the tree
+    console.log(archy(tree));
   });
 });

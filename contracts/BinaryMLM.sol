@@ -63,4 +63,31 @@ contract BinaryMLM {
         }
         return parents;
     }
+
+    function getTree(address userAddress) public view returns (address[] memory) {
+    User memory user = users[userAddress];
+    address[] memory tree = new address[](1);
+    tree[0] = userAddress;
+    if (user.left != address(0)) {
+        address[] memory leftTree = getTree(user.left);
+        tree = mergeArrays(tree, leftTree);
+    }
+    if (user.right != address(0)) {
+        address[] memory rightTree = getTree(user.right);
+        tree = mergeArrays(tree, rightTree);
+    }
+    return tree;
+}
+
+function mergeArrays(address[] memory a, address[] memory b) public pure returns (address[] memory) {
+    address[] memory merged = new address[](a.length + b.length);
+    for (uint i = 0; i < a.length; i++) {
+        merged[i] = a[i];
+    }
+    for (uint i = 0; i < b.length; i++) {
+        merged[i + a.length] = b[i];
+    }
+    return merged;
+}
+
 }
